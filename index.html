@@ -1,1 +1,1346 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ドコイコ — 運命の旅先ガチャ</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Antique+Soft&family=Noto+Sans+JP:wght@300;400;500;700&family=Oswald:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --vermillion:#c0392b; --verm-deep:#8e1c10; --verm-light:#e55a4a;
+  --gold:#d4a843; --gold-light:#f0c96a; --gold-pale:#fdf0cc;
+  --ink:#1a1008; --ink-mid:#2d1e0e;
+  --paper:#fdfaf4; --paper-warm:#f7edda; --paper-mid:#e8d5b4;
+  --sage:#4a7a5a; --indigo:#1e3a6e; --sky:#2980b9;
+  --txt:#1a1008; --txt-mid:#5a3e28; --txt-light:#9a7a5a;
+  --sh:rgba(26,16,8,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--paper);color:var(--txt);min-height:100vh;overflow-x:hidden;}
 
+/* ===== AUTH ===== */
+#authScreen{position:fixed;inset:0;z-index:9999;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;}
+.auth-brand{margin-bottom:32px;text-align:center;}
+.auth-logo-mark{font-size:52px;margin-bottom:8px;display:block;animation:float 3s ease-in-out infinite alternate;}
+@keyframes float{from{transform:translateY(0);}to{transform:translateY(-8px);}}
+.auth-logo-text{font-family:'Zen Antique Soft',serif;font-size:40px;color:var(--gold-light);letter-spacing:6px;}
+.auth-logo-sub{font-size:10px;letter-spacing:5px;color:rgba(255,255,255,0.3);text-transform:uppercase;margin-top:4px;}
+.auth-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:24px 20px;width:100%;max-width:390px;}
+.auth-tabs{display:flex;background:rgba(255,255,255,0.06);border-radius:10px;padding:3px;margin-bottom:22px;}
+.auth-tab{flex:1;padding:9px;text-align:center;font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;border-radius:8px;transition:all .2s;letter-spacing:1px;}
+.auth-tab.active{background:var(--vermillion);color:white;}
+.af{margin-bottom:12px;}
+.af label{display:block;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.35);margin-bottom:5px;text-transform:uppercase;}
+.af input{width:100%;padding:11px 13px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:9px;color:white;font-size:14px;font-family:'Noto Sans JP',sans-serif;outline:none;transition:border .2s;}
+.af input:focus{border-color:var(--gold);}
+.af input::placeholder{color:rgba(255,255,255,0.2);}
+.auth-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--vermillion),var(--verm-deep));color:white;border:none;border-radius:9px;font-family:'Zen Antique Soft',serif;font-size:16px;letter-spacing:3px;cursor:pointer;margin-top:6px;box-shadow:0 4px 18px rgba(192,57,43,0.4);transition:all .2s;}
+.auth-btn:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(192,57,43,0.5);}
+.auth-err{font-size:11px;color:#e74c3c;text-align:center;margin-top:8px;min-height:16px;}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:16px 0;}
+.auth-divider span{flex:1;height:1px;background:rgba(255,255,255,0.08);}
+.auth-divider p{font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:1px;}
+.social-btn{width:100%;padding:11px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);border-radius:9px;color:rgba(255,255,255,0.6);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:7px;transition:all .2s;letter-spacing:.5px;}
+.social-btn:hover{background:rgba(255,255,255,0.09);}
+
+/* ===== APP ===== */
+#appScreen{display:none;}
+.topbar{background:var(--ink);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;position:sticky;top:0;z-index:200;box-shadow:0 2px 14px rgba(0,0,0,0.3);}
+.top-logo{font-family:'Zen Antique Soft',serif;font-size:22px;color:var(--gold-light);letter-spacing:3px;display:flex;align-items:center;gap:6px;}
+.top-right{display:flex;align-items:center;gap:7px;}
+.uchip{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.07);padding:5px 10px;border-radius:18px;cursor:pointer;transition:all .2s;}
+.uchip:hover{background:rgba(255,255,255,0.13);}
+.uchip span{font-size:10px;color:rgba(255,255,255,0.65);max-width:65px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.logout{font-size:10px;color:rgba(255,255,255,0.25);background:none;border:none;cursor:pointer;transition:color .2s;}
+.logout:hover{color:var(--verm-light);}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--ink);border-top:1px solid rgba(255,255,255,0.07);display:flex;z-index:200;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 2px 11px;cursor:pointer;background:none;border:none;transition:all .2s;}
+.ni-icon{font-size:19px;margin-bottom:2px;transition:transform .2s;}
+.ni-label{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.3);text-transform:uppercase;}
+.ni.active .ni-icon{transform:scale(1.12);}
+.ni.active .ni-label{color:var(--gold);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ===== CHARGE BAR ===== */
+.charge-section{background:var(--ink-mid);border-radius:14px;padding:14px 16px;margin-bottom:18px;}
+.charge-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.charge-label{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;}
+.charge-count{font-family:'Oswald',sans-serif;font-size:28px;color:white;}
+.charge-count small{font-size:12px;color:rgba(255,255,255,0.3);}
+.charge-dots{display:flex;gap:6px;}
+.cdot{width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold);transition:all .3s;}
+.cdot.used{background:rgba(255,255,255,0.1);box-shadow:none;}
+.charge-actions{display:flex;gap:8px;margin-top:10px;}
+.charge-action-btn{flex:1;padding:9px 8px;border-radius:9px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.7);font-size:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.5px;}
+.charge-action-btn:hover{background:rgba(255,255,255,0.1);border-color:var(--gold);color:var(--gold-light);}
+.charge-action-btn.highlight{background:rgba(212,168,67,0.12);border-color:var(--gold);color:var(--gold-light);}
+
+/* ===== GACHA ===== */
+.gacha-wrap{max-width:560px;margin:0 auto;padding:18px 14px 100px;}
+.filter-box{background:white;border-radius:13px;padding:14px;margin-bottom:16px;box-shadow:0 2px 12px var(--sh);border:1px solid var(--paper-mid);}
+.filter-title{font-size:11px;color:var(--txt-mid);margin-bottom:10px;letter-spacing:1px;display:flex;align-items:center;gap:5px;}
+.fr{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.fr:last-child{margin-bottom:0;}
+.fl{font-size:8px;letter-spacing:2px;color:var(--txt-light);text-transform:uppercase;width:100%;margin-bottom:2px;}
+.fc{font-size:11px;padding:5px 11px;border-radius:18px;border:1.5px solid var(--paper-mid);background:var(--paper);color:var(--txt-mid);cursor:pointer;transition:all .15s;letter-spacing:.3px;}
+.fc:hover{border-color:var(--verm-light);color:var(--vermillion);}
+.fc.active{background:var(--vermillion);border-color:var(--vermillion);color:white;}
+
+.gacha-stage{display:flex;flex-direction:column;align-items:center;margin-bottom:18px;}
+.torii{width:170px;margin-bottom:-5px;opacity:.9;}
+.bwrap{position:relative;width:200px;height:200px;cursor:pointer;}
+.bring{position:absolute;inset:-10px;border-radius:50%;border:1px solid var(--vermillion);opacity:.2;animation:rp 3s ease-in-out infinite;}
+.bring:nth-child(2){inset:-22px;opacity:.08;animation-delay:1s;}
+@keyframes rp{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+.ball{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff5f5 0%,var(--verm-light) 30%,var(--vermillion) 60%,var(--verm-deep) 100%);box-shadow:inset -18px -13px 36px rgba(0,0,0,0.32),inset 7px 7px 18px rgba(255,255,255,0.2),0 0 45px rgba(192,57,43,0.22),0 14px 36px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;transition:transform .15s;overflow:hidden;}
+.ball:hover{transform:scale(1.03);}
+.ball:active{transform:scale(.97);}
+.ball::before{content:'';position:absolute;top:10%;left:18%;width:35%;height:22%;background:radial-gradient(ellipse,rgba(255,255,255,0.28) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
+.ball-band{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:30px;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;}
+.ball-band span{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:4px;color:var(--vermillion);text-transform:uppercase;}
+.bcontent{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;padding:18px;text-align:center;}
+.bemoji{font-size:44px;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.3));margin-bottom:3px;}
+.bplace{font-family:'Zen Antique Soft',serif;font-size:16px;color:white;text-shadow:0 2px 7px rgba(0,0,0,0.6);line-height:1.2;}
+.bpref{font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.8);margin-top:3px;text-shadow:0 1px 3px rgba(0,0,0,0.6);}
+.bhint{font-size:10px;color:rgba(255,255,255,0.6);margin-top:12px;animation:fy 2s ease-in-out infinite alternate;letter-spacing:1px;}
+@keyframes fy{from{transform:translateY(0);}to{transform:translateY(-4px);}}
+.ball.spinning{animation:bspin .9s cubic-bezier(.4,0,.2,1);}
+@keyframes bspin{0%{transform:scale(1) rotate(0);}50%{transform:scale(1.07) rotate(180deg);filter:brightness(1.5);}100%{transform:scale(1) rotate(360deg);}}
+
+.main-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;background:linear-gradient(135deg,var(--vermillion),var(--verm-deep));color:white;border:none;border-radius:11px;font-family:'Zen Antique Soft',serif;font-size:17px;letter-spacing:4px;cursor:pointer;box-shadow:0 5px 20px rgba(192,57,43,0.4);transition:all .2s;position:relative;overflow:hidden;margin-bottom:12px;}
+.main-btn::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);transition:left .5s;}
+.main-btn:hover::before{left:150%;}
+.main-btn:hover{transform:translateY(-2px);box-shadow:0 9px 28px rgba(192,57,43,0.5);}
+.main-btn:active{transform:translateY(0);}
+.main-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* Result card */
+.result-card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 26px var(--sh);margin-bottom:16px;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s;border:1px solid var(--paper-mid);}
+.result-card.show{opacity:1;transform:translateY(0);}
+.rtop{background:linear-gradient(135deg,var(--ink) 0%,var(--ink-mid) 100%);padding:16px 18px;}
+.reyebrow{font-size:9px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:7px;opacity:.8;}
+.rname{font-family:'Zen Antique Soft',serif;font-size:26px;color:white;line-height:1.1;}
+.rsub{font-size:10px;color:rgba(255,255,255,0.4);margin-top:3px;letter-spacing:2px;}
+.rtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.rtag{font-size:9px;padding:2px 8px;border-radius:18px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.1);}
+.rbody{padding:14px 16px;}
+.rbudget{display:flex;align-items:center;gap:7px;padding:8px 11px;background:linear-gradient(135deg,rgba(212,168,67,0.08),rgba(212,168,67,0.02));border-radius:8px;border:1px solid rgba(212,168,67,0.16);margin-bottom:7px;}
+.rbudget-amount{font-family:'Oswald',sans-serif;font-size:14px;color:var(--gold);margin-left:auto;}
+.rseason{font-size:10px;color:var(--txt-light);margin-bottom:12px;display:flex;align-items:center;gap:4px;}
+.spots-title{font-family:'Zen Antique Soft',serif;font-size:12px;color:var(--txt-mid);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--paper-mid);}
+.slist{display:flex;flex-direction:column;gap:7px;}
+.si{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;background:var(--paper);border-radius:8px;cursor:pointer;transition:all .2s;border:1px solid transparent;text-decoration:none;color:inherit;}
+.si:hover{border-color:var(--verm-light);background:#fff5f5;transform:translateX(3px);}
+.si-emoji{font-size:19px;flex-shrink:0;margin-top:1px;}
+.si-name{font-weight:700;font-size:12px;}
+.si-desc{font-size:10px;color:var(--txt-light);margin-top:1px;line-height:1.5;}
+.si-map{font-size:9px;color:var(--indigo);background:rgba(30,58,110,0.08);padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.map-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;background:var(--indigo);color:white;border:none;border-radius:8px;font-size:11px;font-family:'Noto Sans JP',sans-serif;letter-spacing:2px;cursor:pointer;margin-top:11px;transition:all .2s;}
+.map-btn:hover{background:#2a4d96;}
+
+/* ===== SHARE CARD ===== */
+.share-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--paper-mid);}
+.share-section-title{font-size:10px;letter-spacing:3px;color:var(--txt-light);text-transform:uppercase;margin-bottom:10px;text-align:center;}
+/* Canvas card preview */
+.share-card-preview{width:100%;border-radius:12px;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);}
+#shareCanvas{width:100%;display:block;border-radius:12px;}
+.share-btns{display:flex;gap:7px;flex-wrap:wrap;}
+.sbtn{flex:1;min-width:calc(50% - 4px);display:flex;align-items:center;justify-content:center;gap:5px;padding:10px 6px;border-radius:9px;border:none;font-size:11px;cursor:pointer;transition:all .2s;font-family:'Noto Sans JP',sans-serif;font-weight:500;letter-spacing:.5px;}
+.sbtn:hover{transform:translateY(-2px);}
+.sb-ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:white;}
+.sb-tw{background:#000;color:white;}
+.sb-line{background:#06c755;color:white;}
+.sb-copy{background:var(--paper-mid);color:var(--txt-mid);}
+.sb-dl{background:var(--ink);color:white;}
+
+/* ===== REELS ===== */
+.reel-wrap{background:#0a0a0a;min-height:100vh;padding-bottom:70px;}
+.reel-header{padding:14px 14px 0;display:flex;align-items:center;justify-content:space-between;}
+.reel-header h2{font-family:'Zen Antique Soft',serif;font-size:20px;color:white;}
+.reel-filter-row{display:flex;gap:6px;overflow-x:auto;padding:10px 14px;scrollbar-width:none;}
+.reel-filter-row::-webkit-scrollbar{display:none;}
+.rfc{font-size:10px;padding:5px 13px;border-radius:18px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.55);cursor:pointer;white-space:nowrap;transition:all .2s;}
+.rfc.active{background:var(--vermillion);border-color:var(--vermillion);color:white;}
+.reel-feed{display:flex;flex-direction:column;gap:1px;}
+.reel-card{position:relative;aspect-ratio:9/16;max-height:88vh;background:linear-gradient(180deg,#111 0%,#1a1a1a 100%);overflow:hidden;cursor:pointer;}
+.reel-bg-emoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:90px;opacity:.15;}
+.reel-grad{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,0.88) 0%,rgba(0,0,0,0.08) 50%,rgba(0,0,0,0.28) 100%);}
+.reel-badge{position:absolute;top:13px;right:13px;background:linear-gradient(135deg,var(--gold),var(--vermillion));color:white;padding:4px 9px;border-radius:18px;font-size:9px;font-weight:700;letter-spacing:1px;display:flex;align-items:center;gap:3px;box-shadow:0 2px 10px rgba(0,0,0,0.4);}
+.reel-play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;font-size:24px;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.2);}
+.reel-info{position:absolute;bottom:0;left:0;right:58px;padding:14px 12px;}
+.reel-user{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.reel-avatar{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:16px;background:rgba(255,255,255,0.08);}
+.reel-uname{font-size:12px;font-weight:700;color:white;}
+.reel-follow{font-size:9px;color:var(--gold);border:1px solid var(--gold);padding:2px 7px;border-radius:9px;margin-left:5px;cursor:pointer;}
+.reel-place{font-size:10px;color:var(--gold);margin-bottom:3px;display:flex;align-items:center;gap:3px;}
+.reel-caption{font-size:11px;color:rgba(255,255,255,0.82);line-height:1.5;}
+.reel-actions{position:absolute;right:8px;bottom:14px;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.raction{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;}
+.raction-icon{font-size:22px;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.5));}
+.raction-count{font-size:9px;color:rgba(255,255,255,0.75);}
+.reel-share-strip{background:rgba(255,255,255,0.05);border-top:1px solid rgba(255,255,255,0.07);padding:9px 12px;display:flex;gap:6px;align-items:center;}
+.rss-label{font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:1px;flex-shrink:0;}
+.rsb{display:flex;align-items:center;gap:3px;padding:4px 8px;border-radius:12px;border:none;font-size:9px;cursor:pointer;transition:all .2s;}
+.rsb:hover{transform:translateY(-1px);}
+
+/* ===== MISSION ===== */
+.mission-wrap{max-width:560px;margin:0 auto;padding:18px 14px 100px;}
+.msection-title{font-family:'Zen Antique Soft',serif;font-size:22px;color:var(--ink);margin-bottom:4px;}
+.msection-sub{font-size:10px;color:var(--txt-light);letter-spacing:1px;margin-bottom:18px;}
+.mark-box{background:linear-gradient(135deg,var(--ink),#2a160a);border-radius:14px;padding:16px;margin-bottom:16px;color:white;display:flex;gap:11px;}
+.mark-big{font-size:34px;flex-shrink:0;}
+.mark-text h3{font-family:'Zen Antique Soft',serif;font-size:15px;color:var(--gold-light);margin-bottom:4px;}
+.mark-text p{font-size:10px;color:rgba(255,255,255,0.55);line-height:1.7;}
+.mcard{background:white;border-radius:13px;padding:16px;margin-bottom:11px;box-shadow:0 2px 12px var(--sh);border:1px solid var(--paper-mid);position:relative;overflow:hidden;}
+.mcard.done{border-color:var(--sage);}
+.mcard::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--vermillion);}
+.mcard.done::before{background:var(--sage);}
+.mcard.hard::before{background:var(--gold);}
+.mtop{display:flex;align-items:flex-start;gap:9px;margin-bottom:11px;}
+.micon{font-size:26px;flex-shrink:0;}
+.minfo{flex:1;}
+.mtitle{font-family:'Zen Antique Soft',serif;font-size:15px;color:var(--ink);margin-bottom:2px;}
+.mdesc{font-size:10px;color:var(--txt-light);line-height:1.6;}
+.mbadge{text-align:center;flex-shrink:0;}
+.mbadge-icon{font-size:28px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1));}
+.mbadge-name{font-size:7px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-top:2px;}
+.mprog-wrap{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+.mprog{flex:1;height:5px;background:var(--paper-mid);border-radius:3px;overflow:hidden;}
+.mprog-fill{height:100%;background:linear-gradient(90deg,var(--vermillion),var(--gold));border-radius:3px;transition:width .5s;}
+.mprog-label{font-size:9px;color:var(--txt-light);white-space:nowrap;}
+.mupload-btn{width:100%;padding:9px;border-radius:7px;border:2px dashed var(--paper-mid);background:var(--paper);font-size:11px;color:var(--txt-mid);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.5px;}
+.mupload-btn:hover{border-color:var(--verm-light);background:#fff5f5;color:var(--vermillion);}
+.mupload-btn.done-state{border-style:solid;border-color:var(--sage);background:rgba(74,122,90,0.05);color:var(--sage);cursor:default;}
+
+/* ===== COMMUNITY ===== */
+.community-wrap{max-width:560px;margin:0 auto;padding:14px 14px 100px;}
+.ctop{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.ctop h2{font-family:'Zen Antique Soft',serif;font-size:20px;}
+.post-btn{background:var(--vermillion);color:white;border:none;padding:7px 13px;border-radius:17px;font-size:10px;cursor:pointer;letter-spacing:1px;display:flex;align-items:center;gap:4px;transition:all .2s;}
+.post-btn:hover{background:var(--verm-deep);}
+.pcard{background:white;border-radius:13px;overflow:hidden;box-shadow:0 2px 12px var(--sh);border:1px solid var(--paper-mid);margin-bottom:12px;}
+.pimg{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,var(--paper-mid),var(--paper-warm));display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;}
+.pmission-badge{position:absolute;top:9px;right:9px;background:linear-gradient(135deg,var(--gold),var(--vermillion));color:white;padding:4px 8px;border-radius:16px;font-size:9px;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;gap:3px;box-shadow:0 2px 9px rgba(0,0,0,0.3);}
+.pbody{padding:11px 13px;}
+.puser{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.pavatar{width:26px;height:26px;border-radius:50%;background:var(--paper-warm);font-size:14px;display:flex;align-items:center;justify-content:center;}
+.pname{font-size:11px;font-weight:700;}
+.pdate{font-size:9px;color:var(--txt-light);margin-left:auto;}
+.pplace{font-size:10px;color:var(--vermillion);font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:3px;}
+.pcaption{font-size:11px;color:var(--txt-mid);line-height:1.6;}
+.pactions{display:flex;gap:9px;margin-top:9px;padding-top:9px;border-top:1px solid var(--paper-mid);}
+.paction{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--txt-light);background:none;border:none;cursor:pointer;transition:color .2s;}
+.paction:hover{color:var(--vermillion);}
+/* comments */
+.comments-section{padding:9px 13px;background:var(--paper);border-top:1px solid var(--paper-mid);}
+.comments-title{font-size:9px;letter-spacing:2px;color:var(--txt-light);text-transform:uppercase;margin-bottom:8px;}
+.comment-item{display:flex;gap:7px;margin-bottom:7px;}
+.c-avatar{width:22px;height:22px;border-radius:50%;background:var(--paper-warm);font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.c-content{flex:1;}
+.c-name{font-size:10px;font-weight:700;color:var(--txt);}
+.c-text{font-size:10px;color:var(--txt-mid);line-height:1.5;}
+.comment-input-row{display:flex;gap:6px;margin-top:8px;}
+.comment-input{flex:1;padding:7px 10px;border:1.5px solid var(--paper-mid);border-radius:8px;font-size:11px;font-family:'Noto Sans JP',sans-serif;outline:none;transition:border .2s;background:white;}
+.comment-input:focus{border-color:var(--gold);}
+.comment-submit{padding:7px 13px;background:var(--vermillion);color:white;border:none;border-radius:8px;font-size:10px;cursor:pointer;letter-spacing:.5px;transition:all .2s;}
+.comment-submit:hover{background:var(--verm-deep);}
+.post-share-row{display:flex;gap:5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--paper-mid);align-items:center;flex-wrap:wrap;}
+.psr-label{font-size:8px;letter-spacing:2px;color:var(--txt-light);text-transform:uppercase;flex-shrink:0;}
+.psb{display:flex;align-items:center;gap:3px;padding:4px 8px;border-radius:11px;border:none;font-size:9px;cursor:pointer;transition:all .2s;}
+.psb:hover{transform:translateY(-1px);}
+
+/* ===== HOTELS ===== */
+.hotel-wrap{max-width:560px;margin:0 auto;padding:16px 14px 100px;}
+.htop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.htop h2{font-family:'Zen Antique Soft',serif;font-size:20px;}
+.hotel-filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;}
+.hotel-filter-row::-webkit-scrollbar{display:none;}
+.hfc{font-size:10px;padding:5px 12px;border-radius:16px;border:1.5px solid var(--paper-mid);background:var(--paper);color:var(--txt-mid);cursor:pointer;white-space:nowrap;transition:all .2s;}
+.hfc.active{background:var(--vermillion);border-color:var(--vermillion);color:white;}
+.hotel-grid{display:flex;flex-direction:column;gap:14px;}
+.hcard{background:white;border-radius:16px;overflow:hidden;box-shadow:0 3px 18px var(--sh);border:1px solid var(--paper-mid);}
+.himg{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,var(--paper-mid),var(--paper-warm));display:flex;align-items:center;justify-content:center;font-size:56px;position:relative;}
+.h-saved-btn{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.12);}
+.h-saved-btn:hover{transform:scale(1.1);}
+.h-saved-btn.saved{background:var(--vermillion);color:white;}
+.h-pref-tag{position:absolute;top:10px;left:10px;background:var(--ink);color:var(--gold-light);font-size:9px;padding:3px 9px;border-radius:12px;letter-spacing:1px;}
+.hbody{padding:14px 16px;}
+.hname{font-family:'Zen Antique Soft',serif;font-size:18px;color:var(--ink);margin-bottom:4px;}
+.hloc{font-size:11px;color:var(--txt-light);display:flex;align-items:center;gap:4px;margin-bottom:10px;cursor:pointer;transition:color .2s;}
+.hloc:hover{color:var(--indigo);}
+.hstar-row{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.hstars{display:flex;gap:2px;}
+.hstar{font-size:14px;cursor:pointer;transition:transform .15s;}
+.hstar:hover{transform:scale(1.2);}
+.hstar-count{font-size:11px;color:var(--txt-light);}
+.hprice-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.hprice-label{font-size:9px;letter-spacing:2px;color:var(--txt-light);text-transform:uppercase;}
+.hprice{font-family:'Oswald',sans-serif;font-size:22px;color:var(--vermillion);}
+.hprice small{font-size:11px;color:var(--txt-light);}
+.hfeatures{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.hfeat{font-size:9px;padding:3px 8px;border-radius:10px;background:var(--paper);border:1px solid var(--paper-mid);color:var(--txt-mid);}
+.hactions{display:flex;gap:7px;}
+.h-map-btn{flex:1;padding:10px;background:var(--indigo);color:white;border:none;border-radius:8px;font-size:10px;cursor:pointer;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s;}
+.h-map-btn:hover{background:#2a4d96;}
+.h-reserve-btn{flex:1;padding:10px;background:linear-gradient(135deg,var(--vermillion),var(--verm-deep));color:white;border:none;border-radius:8px;font-size:10px;cursor:pointer;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s;}
+.h-reserve-btn:hover{transform:translateY(-1px);}
+/* hotel comments */
+.hcomments{padding:12px 16px;background:var(--paper);border-top:1px solid var(--paper-mid);}
+.hcomments-title{font-size:9px;letter-spacing:2px;color:var(--txt-light);text-transform:uppercase;margin-bottom:9px;}
+
+/* ===== PROFILE ===== */
+.profile-wrap{max-width:560px;margin:0 auto;padding:18px 14px 100px;}
+.phero{background:linear-gradient(135deg,var(--ink),var(--ink-mid));border-radius:16px;padding:22px 18px;margin-bottom:16px;color:white;text-align:center;}
+.phero-avatar{font-size:52px;margin-bottom:7px;}
+.phero-name{font-family:'Zen Antique Soft',serif;font-size:22px;color:var(--gold-light);margin-bottom:2px;}
+.phero-email{font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:14px;}
+.pstats{display:flex;justify-content:center;gap:28px;}
+.pstat-num{font-family:'Oswald',sans-serif;font-size:22px;color:white;}
+.pstat-label{font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-top:2px;}
+.psection{background:white;border-radius:13px;padding:14px 16px;margin-bottom:11px;box-shadow:0 2px 11px var(--sh);border:1px solid var(--paper-mid);}
+.psection h3{font-family:'Zen Antique Soft',serif;font-size:14px;color:var(--ink);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--paper-mid);}
+.badge-grid{display:flex;flex-wrap:wrap;gap:9px;}
+.badge-item{text-align:center;width:58px;}
+.badge-icon{font-size:30px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.08));}
+.badge-name{font-size:7px;letter-spacing:.5px;color:var(--txt-light);margin-top:2px;line-height:1.3;}
+.badge-item.locked{opacity:.2;filter:grayscale(1);}
+.visited-chips{display:flex;flex-wrap:wrap;gap:5px;}
+.vchip{font-size:10px;padding:3px 9px;background:var(--paper);border-radius:9px;color:var(--txt-mid);border:1px solid var(--paper-mid);display:flex;align-items:center;gap:3px;}
+
+/* invite section */
+.invite-section{background:linear-gradient(135deg,var(--ink),#2a160a);border-radius:13px;padding:16px;margin-bottom:11px;color:white;}
+.invite-title{font-family:'Zen Antique Soft',serif;font-size:16px;color:var(--gold-light);margin-bottom:5px;}
+.invite-desc{font-size:10px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:12px;}
+.invite-code{background:rgba(255,255,255,0.08);border-radius:8px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;border:1px solid rgba(255,255,255,0.12);}
+.invite-code-text{font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:4px;color:var(--gold-light);}
+.copy-code-btn{font-size:10px;padding:5px 11px;border:1px solid var(--gold);background:rgba(212,168,67,0.1);color:var(--gold-light);border-radius:7px;cursor:pointer;transition:all .2s;}
+.copy-code-btn:hover{background:rgba(212,168,67,0.2);}
+.invite-share-btns{display:flex;gap:6px;}
+.isb{flex:1;padding:9px;border-radius:8px;border:none;font-size:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:4px;}
+.isb:hover{transform:translateY(-1px);}
+
+/* ===== MODALS ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(4px);}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{background:white;border-radius:20px 20px 0 0;padding:22px 18px 38px;width:100%;max-width:560px;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.2,.64,1);max-height:90vh;overflow-y:auto;}
+.overlay.open .modal{transform:translateY(0);}
+.mhandle{width:36px;height:4px;background:var(--paper-mid);border-radius:2px;margin:0 auto 16px;}
+.mtitle2{font-family:'Zen Antique Soft',serif;font-size:19px;margin-bottom:4px;color:var(--ink);}
+.msub2{font-size:10px;color:var(--txt-light);margin-bottom:15px;letter-spacing:1px;}
+.upload-area{border:2px dashed var(--paper-mid);border-radius:12px;padding:32px 16px;text-align:center;margin-bottom:12px;cursor:pointer;transition:all .2s;background:var(--paper);}
+.upload-area:hover{border-color:var(--verm-light);background:#fff5f5;}
+.modal-cta{width:100%;padding:13px;background:linear-gradient(135deg,var(--vermillion),var(--verm-deep));color:white;border:none;border-radius:10px;font-family:'Zen Antique Soft',serif;font-size:15px;letter-spacing:3px;cursor:pointer;box-shadow:0 4px 16px rgba(192,57,43,0.33);margin-top:7px;transition:all .2s;}
+.modal-cta:hover{transform:translateY(-1px);}
+
+/* video modal */
+.video-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center;}
+.video-overlay.open{display:flex;}
+.video-close{position:absolute;top:14px;right:14px;font-size:26px;color:white;cursor:pointer;background:none;border:none;}
+.video-player{width:88vw;max-width:360px;aspect-ratio:9/16;border-radius:14px;overflow:hidden;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.video-ph{font-size:70px;opacity:.25;}
+.video-txt{color:rgba(255,255,255,0.4);font-size:11px;margin-top:10px;letter-spacing:2px;}
+.video-share-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center;}
+
+/* toast */
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:white;padding:9px 18px;border-radius:18px;font-size:11px;letter-spacing:1px;z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,0.4);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.confetti-c{position:fixed;inset:0;pointer-events:none;z-index:1000;}
+</style>
+</head>
+<body>
+<div class="confetti-c" id="confetti"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ====== AUTH ====== -->
+<div id="authScreen">
+  <div class="auth-brand">
+    <span class="auth-logo-mark">🎌</span>
+    <div class="auth-logo-text">ドコイコ</div>
+    <div class="auth-logo-sub">运命の旅先ガチャ</div>
+  </div>
+  <div class="auth-box">
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="atLogin" onclick="switchAuth('login')">ログイン</div>
+      <div class="auth-tab" id="atSignup" onclick="switchAuth('signup')">新規登録</div>
+    </div>
+    <div id="afLogin">
+      <div class="af"><label>メールアドレス</label><input type="email" id="lEmail" placeholder="your@email.com"></div>
+      <div class="af"><label>パスワード</label><input type="password" id="lPass" placeholder="••••••••"></div>
+      <button class="auth-btn" onclick="doLogin()">ログイン</button>
+      <div class="auth-err" id="lErr"></div>
+      <div class="auth-divider"><span></span><p>または</p><span></span></div>
+      <button class="social-btn" onclick="socialLogin('Google')">🔍 Googleでログイン</button>
+      <button class="social-btn" onclick="socialLogin('LINE')">💬 LINEでログイン</button>
+      <button class="social-btn" onclick="socialLogin('Apple')">🍎 Appleでログイン</button>
+    </div>
+    <div id="afSignup" style="display:none">
+      <div class="af"><label>ニックネーム</label><input type="text" id="sName" placeholder="旅するたろう"></div>
+      <div class="af"><label>メールアドレス</label><input type="email" id="sEmail" placeholder="your@email.com"></div>
+      <div class="af"><label>パスワード（6文字以上）</label><input type="password" id="sPass" placeholder="••••••••"></div>
+      <div class="af"><label>招待コード（任意）</label><input type="text" id="sInvite" placeholder="例: TABI-XXXX"></div>
+      <button class="auth-btn" onclick="doSignup()">アカウント作成</button>
+      <div class="auth-err" id="sErr"></div>
+      <div class="auth-divider"><span></span><p>または</p><span></span></div>
+      <button class="social-btn" onclick="socialLogin('Google')">🔍 Googleで登録</button>
+      <button class="social-btn" onclick="socialLogin('LINE')">💬 LINEで登録</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== APP ====== -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="top-logo">🎌 ドコイコ</div>
+    <div class="top-right">
+      <div class="uchip" onclick="switchTab('profile')">
+        <span id="topAvatar">✈️</span>
+        <span id="topName">ゲスト</span>
+      </div>
+      <button class="logout" onclick="doLogout()">ログアウト</button>
+    </div>
+  </div>
+
+  <!-- GACHA TAB -->
+  <div class="tab-panel active" id="tab-gacha">
+    <div class="gacha-wrap">
+      <div class="charge-section">
+        <div class="charge-top">
+          <div>
+            <div class="charge-label">本日のガチャ回数</div>
+            <div class="charge-count" id="chargeNum">1 <small>/ 1回</small></div>
+          </div>
+          <div style="text-align:center">
+            <div class="charge-dots" id="chargeDots"></div>
+            <div style="font-size:8px;color:rgba(255,255,255,0.25);margin-top:4px;letter-spacing:1px">毎日リセット</div>
+          </div>
+        </div>
+        <div class="charge-actions">
+          <button class="charge-action-btn highlight" onclick="showInviteModal()">👫 友達を招待 +1回</button>
+          <button class="charge-action-btn" onclick="claimLoginBonus()">🎁 ログインボーナス</button>
+          <button class="charge-action-btn" onclick="showToast('プレミアム会員は毎日5回！(近日公開)')">👑 プレミアム</button>
+        </div>
+      </div>
+
+      <div class="filter-box">
+        <div class="filter-title">🗾 絞り込みフィルター</div>
+        <div class="fr"><div class="fl">地方</div>
+          <button class="fc active" onclick="sf(this,'region','all')">全国</button>
+          <button class="fc" onclick="sf(this,'region','北海道・東北')">北海道・東北</button>
+          <button class="fc" onclick="sf(this,'region','関東')">関東</button>
+          <button class="fc" onclick="sf(this,'region','中部')">中部</button>
+          <button class="fc" onclick="sf(this,'region','近畿')">近畿</button>
+          <button class="fc" onclick="sf(this,'region','中国・四国')">中国・四国</button>
+          <button class="fc" onclick="sf(this,'region','九州・沖縄')">九州・沖縄</button>
+        </div>
+        <div class="fr" id="prefRow" style="display:none"><div class="fl">都道府県</div><div id="prefChips" style="display:flex;flex-wrap:wrap;gap:4px;"></div></div>
+        <div class="fr"><div class="fl">テーマ</div>
+          <button class="fc active" onclick="sf(this,'theme','all')">すべて</button>
+          <button class="fc" onclick="sf(this,'theme','自然')">🌿 自然</button>
+          <button class="fc" onclick="sf(this,'theme','歴史')">⛩ 歴史</button>
+          <button class="fc" onclick="sf(this,'theme','グルメ')">🍜 グルメ</button>
+          <button class="fc" onclick="sf(this,'theme','温泉')">♨️ 温泉</button>
+          <button class="fc" onclick="sf(this,'theme','都市')">🏙 都市</button>
+          <button class="fc" onclick="sf(this,'theme','離島')">🏝 離島</button>
+        </div>
+        <div class="fr"><div class="fl">予算（1泊2日・1人）</div>
+          <button class="fc active" onclick="sf(this,'budget','all')">指定なし</button>
+          <button class="fc" onclick="sf(this,'budget','〜3万')">〜3万円</button>
+          <button class="fc" onclick="sf(this,'budget','3〜5万')">3〜5万円</button>
+          <button class="fc" onclick="sf(this,'budget','5万〜')">5万円〜</button>
+        </div>
+      </div>
+
+      <div class="gacha-stage">
+        <svg class="torii" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <rect x="15" y="20" width="8" height="60" fill="#c0392b" rx="2"/>
+          <rect x="177" y="20" width="8" height="60" fill="#c0392b" rx="2"/>
+          <rect x="5" y="14" width="190" height="10" fill="#c0392b" rx="3"/>
+          <rect x="-5" y="8" width="210" height="8" fill="#c0392b" rx="3"/>
+          <rect x="25" y="38" width="150" height="6" fill="#c0392b" rx="2"/>
+        </svg>
+        <div class="bwrap" onclick="doGacha()">
+          <div class="bring"></div><div class="bring"></div>
+          <div class="ball" id="ball">
+            <div class="ball-band"><span>DOKO IKO</span></div>
+            <div class="bcontent" id="bcontent">
+              <div class="bemoji">🎌</div>
+              <div class="bhint">タップしてガチャ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="main-btn" id="mainBtn" onclick="doGacha()">🎲 ガチャを引く</button>
+
+      <div class="result-card" id="resultCard">
+        <div class="rtop">
+          <div class="reyebrow">✦ 運命の旅先 ✦</div>
+          <div class="rname" id="resName">—</div>
+          <div class="rsub" id="resSub">—</div>
+          <div class="rtags" id="resTags"></div>
+        </div>
+        <div class="rbody">
+          <div class="rbudget"><span style="font-size:15px">💴</span><span style="font-size:10px;color:var(--txt-mid)">目安予算</span><span class="rbudget-amount" id="resBudget">—</span></div>
+          <div class="rseason" id="resSeason"></div>
+          <div class="spots-title">📍 おすすめスポット</div>
+          <div class="slist" id="spotList"></div>
+          <button class="map-btn" onclick="openMap()">🗺️ Googleマップで見る</button>
+          <div style="font-size:9px;color:var(--txt-light);text-align:center;margin-top:5px;">スポット名タップで個別マップが開きます</div>
+
+          <!-- SHARE CARD -->
+          <div class="share-section">
+            <div class="share-section-title">✦ インスタ映えシェア画像 ✦</div>
+            <div class="share-card-preview"><canvas id="shareCanvas"></canvas></div>
+            <div class="share-btns">
+              <button class="sbtn sb-ig" onclick="shareResult('instagram')">📸 Instagram</button>
+              <button class="sbtn sb-tw" onclick="shareResult('twitter')">𝕏 Xでポスト</button>
+              <button class="sbtn sb-line" onclick="shareResult('line')">💬 LINE</button>
+              <button class="sbtn sb-dl" onclick="shareResult('download')">⬇️ 画像保存</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="historyWrap" style="display:none;margin-top:4px;">
+        <div style="font-size:8px;letter-spacing:2px;color:var(--txt-light);text-transform:uppercase;margin-bottom:4px;">🗓 旅の履歴</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;" id="historyBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REELS TAB -->
+  <div class="tab-panel" id="tab-reels">
+    <div class="reel-wrap">
+      <div class="reel-header"><h2>🎬 旅リール</h2></div>
+      <div class="reel-filter-row">
+        <div class="rfc active" onclick="filterReels(this,'all')">すべて</div>
+        <div class="rfc" onclick="filterReels(this,'mission')">🏅 ミッション達成</div>
+        <div class="rfc" onclick="filterReels(this,'自然')">🌿 自然</div>
+        <div class="rfc" onclick="filterReels(this,'グルメ')">🍜 グルメ</div>
+        <div class="rfc" onclick="filterReels(this,'温泉')">♨️ 温泉</div>
+        <div class="rfc" onclick="filterReels(this,'歴史')">⛩ 歴史</div>
+      </div>
+      <div class="reel-feed" id="reelFeed"></div>
+    </div>
+  </div>
+
+  <!-- MISSION TAB -->
+  <div class="tab-panel" id="tab-mission">
+    <div class="mission-wrap">
+      <div class="msection-title">⛩ ミッション</div>
+      <div class="msection-sub">達成して金の認定バッジをゲットしよう</div>
+      <div class="mark-box">
+        <div class="mark-big">🏅</div>
+        <div class="mark-text">
+          <h3>ミッション達成バッジとは？</h3>
+          <p>ミッションクリアの写真を投稿すると<strong style="color:var(--gold-light)">金の認定バッジ</strong>が付きます。達成者だけの特権で「自分も行きたい！」と思わせる旅の証明です。</p>
+        </div>
+      </div>
+      <div id="missionList"></div>
+    </div>
+  </div>
+
+  <!-- COMMUNITY TAB -->
+  <div class="tab-panel" id="tab-community">
+    <div class="community-wrap">
+      <div class="ctop">
+        <h2>旅の記録</h2>
+        <button class="post-btn" onclick="openUpload()">📷 投稿する</button>
+      </div>
+      <div id="postGrid"></div>
+    </div>
+  </div>
+
+  <!-- HOTELS TAB -->
+  <div class="tab-panel" id="tab-hotels">
+    <div class="hotel-wrap">
+      <div class="htop"><h2>🏨 おすすめ宿</h2></div>
+      <div class="hotel-filter-row">
+        <div class="hfc active" onclick="hFilter(this,'all')">すべて</div>
+        <div class="hfc" onclick="hFilter(this,'北海道')">北海道</div>
+        <div class="hfc" onclick="hFilter(this,'東北')">東北</div>
+        <div class="hfc" onclick="hFilter(this,'関東')">関東</div>
+        <div class="hfc" onclick="hFilter(this,'近畿')">近畿</div>
+        <div class="hfc" onclick="hFilter(this,'九州')">九州</div>
+        <div class="hfc" onclick="hFilter(this,'沖縄')">沖縄</div>
+      </div>
+      <div class="hotel-grid" id="hotelGrid"></div>
+    </div>
+  </div>
+
+  <!-- PROFILE TAB -->
+  <div class="tab-panel" id="tab-profile">
+    <div class="profile-wrap">
+      <div class="phero">
+        <div class="phero-avatar" id="pAvatar">✈️</div>
+        <div class="phero-name" id="pName">旅人</div>
+        <div class="phero-email" id="pEmail">—</div>
+        <div class="pstats">
+          <div style="text-align:center"><div class="pstat-num" id="stGacha">0</div><div class="pstat-label">ガチャ回数</div></div>
+          <div style="text-align:center"><div class="pstat-num" id="stVisited">0</div><div class="pstat-label">訪問先</div></div>
+          <div style="text-align:center"><div class="pstat-num" id="stBadges">0</div><div class="pstat-label">バッジ</div></div>
+        </div>
+      </div>
+      <div class="invite-section">
+        <div class="invite-title">👫 友達を招待してガチャ+1回！</div>
+        <div class="invite-desc">招待コードを友達にシェア。友達が登録するとあなたのガチャ回数が1回増えます！</div>
+        <div class="invite-code">
+          <span class="invite-code-text" id="inviteCode">TABI-????</span>
+          <button class="copy-code-btn" onclick="copyInviteCode()">コピー</button>
+        </div>
+        <div class="invite-share-btns">
+          <button class="isb sb-ig" onclick="shareInvite('instagram')">📸 Instagram</button>
+          <button class="isb sb-tw" onclick="shareInvite('twitter')">𝕏 X</button>
+          <button class="isb sb-line" onclick="shareInvite('line')">💬 LINE</button>
+        </div>
+      </div>
+      <div class="psection">
+        <h3>🏅 獲得バッジ</h3>
+        <div class="badge-grid" id="badgeGrid"></div>
+      </div>
+      <div class="psection">
+        <h3>🗾 訪問した旅先</h3>
+        <div class="visited-chips" id="visitedChips"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="ni active" onclick="switchTab('gacha')"><span class="ni-icon">🎲</span><span class="ni-label">ガチャ</span></button>
+    <button class="ni" onclick="switchTab('reels')"><span class="ni-icon">🎬</span><span class="ni-label">リール</span></button>
+    <button class="ni" onclick="switchTab('mission')"><span class="ni-icon">⛩</span><span class="ni-label">ミッション</span></button>
+    <button class="ni" onclick="switchTab('community')"><span class="ni-icon">📸</span><span class="ni-label">投稿</span></button>
+    <button class="ni" onclick="switchTab('hotels')"><span class="ni-icon">🏨</span><span class="ni-label">宿</span></button>
+    <button class="ni" onclick="switchTab('profile')"><span class="ni-icon">👤</span><span class="ni-label">マイページ</span></button>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="overlay" id="uploadOverlay" onclick="closeOverlay(event,'uploadOverlay')">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle2">旅の写真を投稿する</div>
+    <div class="msub2" id="uploadSub">📸 ミッション達成の写真は特別バッジ付きで投稿できます</div>
+    <div class="upload-area" onclick="simUpload()"><div style="font-size:40px;margin-bottom:7px">📷</div><div style="font-size:11px;color:var(--txt-mid);letter-spacing:1px">写真を選択またはドラッグ＆ドロップ</div></div>
+    <div id="missionPickWrap">
+      <div style="font-size:10px;color:var(--txt-light);margin-bottom:6px;letter-spacing:1px">対応ミッションを選択（任意）</div>
+      <div id="missionPickList" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+    <button class="modal-cta" onclick="submitPost()">投稿する ✦</button>
+  </div>
+</div>
+
+<!-- INVITE MODAL -->
+<div class="overlay" id="inviteOverlay" onclick="closeOverlay(event,'inviteOverlay')">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle2">友達を招待する</div>
+    <div class="msub2">友達が招待コードで登録するとガチャ+1回！</div>
+    <div class="invite-code" style="margin-bottom:14px;background:var(--paper);border:1.5px solid var(--paper-mid);">
+      <span class="invite-code-text" style="color:var(--vermillion);" id="inviteCode2">TABI-????</span>
+      <button class="copy-code-btn" onclick="copyInviteCode()" style="border-color:var(--vermillion);color:var(--vermillion);">コピー</button>
+    </div>
+    <button class="modal-cta" onclick="closeOverlay({target:document.getElementById('inviteOverlay')},'inviteOverlay');addCharge('invite')">シェアして回数をゲット！</button>
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="video-overlay" id="videoOverlay">
+  <button class="video-close" onclick="closeVideo()">✕</button>
+  <div class="video-player"><div class="video-ph" id="videoEmoji">🎬</div><div class="video-txt">動画プレビュー</div></div>
+  <div class="video-share-row">
+    <button class="sbtn sb-ig" onclick="doShare('instagram','旅リールをシェア！ #ドコイコ #旅ガチャ','https://doko-iko.jp')">📸 Instagram</button>
+    <button class="sbtn sb-tw" onclick="doShare('twitter','旅リールをシェア！ #ドコイコ #旅ガチャ','https://doko-iko.jp')">𝕏 X</button>
+    <button class="sbtn sb-line" onclick="doShare('line','旅リールをシェア！ #ドコイコ #旅ガチャ','https://doko-iko.jp')">💬 LINE</button>
+    <button class="sbtn sb-copy" onclick="doShare('copy','旅リールをシェア！ #ドコイコ #旅ガチャ','https://doko-iko.jp')">🔗 コピー</button>
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+const DESTS = [
+  {id:'hokkaido',name:'札幌',pref:'北海道',region:'北海道・東北',emoji:'🦀',themes:['グルメ','都市','自然'],budget:'3〜5万',budgetStr:'3〜5万円',season:'☃️ 冬の雪まつり・夏のラベンダー',tags:['グルメ','雪','自然'],color:'#1a4a6e',
+    spots:[{name:'大通公園',desc:'冬はイルミ、夏はビアガーデン',emoji:'🌸'},{name:'すすきの',desc:'北海道最大の歓楽街。海鮮・ジンギスカン',emoji:'🍜'},{name:'小樽運河',desc:'明治・大正の港町情緒',emoji:'⛵'},{name:'北海道神宮',desc:'円山公園に佇む道内随一の大社',emoji:'⛩️'}]},
+  {id:'tokyo',name:'東京',pref:'東京',region:'関東',emoji:'🗼',themes:['都市','グルメ','歴史'],budget:'3〜5万',budgetStr:'3〜6万円',season:'🌸 春の桜・秋の紅葉',tags:['トレンド','グルメ','エンタメ'],color:'#1a1a3e',
+    spots:[{name:'浅草・浅草寺',desc:'江戸情緒漂う東京最古の寺',emoji:'🏮'},{name:'渋谷スクランブル',desc:'世界一有名な交差点',emoji:'🚦'},{name:'新宿御苑',desc:'都心の大庭園。春の桜は別格',emoji:'🌸'},{name:'築地市場外市場',desc:'新鮮な海鮮丼・卵焼き',emoji:'🍣'}]},
+  {id:'kyoto',name:'京都',pref:'京都',region:'近畿',emoji:'⛩️',themes:['歴史','自然','グルメ'],budget:'3〜5万',budgetStr:'3〜6万円',season:'🌸 春の桜・秋の紅葉が最高',tags:['寺社','紅葉','抹茶'],color:'#3e1a1a',
+    spots:[{name:'伏見稲荷大社',desc:'千本鳥居が連なるパワースポット',emoji:'⛩️'},{name:'嵐山・竹林',desc:'緑のトンネルをくぐる非日常',emoji:'🎋'},{name:'金閣寺',desc:'鏡湖池に映える金色の舎利殿',emoji:'✨'},{name:'祇園四条',desc:'石畳と格子戸が続く京情緒',emoji:'🏮'}]},
+  {id:'osaka',name:'大阪',pref:'大阪',region:'近畿',emoji:'🐙',themes:['グルメ','都市','歴史'],budget:'〜3万',budgetStr:'2〜4万円',season:'🌸 桜（3〜4月）・御堂筋イルミ',tags:['たこ焼き','道頓堀','城'],color:'#3e2a1a',
+    spots:[{name:'道頓堀',desc:'くいだおれ太郎とグリコの看板',emoji:'🎭'},{name:'大阪城',desc:'秀吉が築いた名城',emoji:'🏯'},{name:'黒門市場',desc:'大阪の台所。海産物食べ歩き',emoji:'🦞'},{name:'通天閣・新世界',desc:'昭和レトロな下町',emoji:'🗼'}]},
+  {id:'okinawa',name:'沖縄本島',pref:'沖縄',region:'九州・沖縄',emoji:'🌺',themes:['自然','離島','歴史'],budget:'3〜5万',budgetStr:'3〜6万円',season:'🏖 夏のビーチ・冬も20℃前後',tags:['海','珊瑚礁','琉球文化'],color:'#1a3e3e',
+    spots:[{name:'首里城',desc:'琉球王国の王城。世界遺産',emoji:'🏯'},{name:'美ら海水族館',desc:'世界最大級の水槽',emoji:'🐋'},{name:'古宇利島',desc:'エメラルドグリーンの海',emoji:'🏝️'},{name:'国際通り',desc:'那覇の繁華街',emoji:'🛍️'}]},
+  {id:'kanagawa',name:'鎌倉・横浜',pref:'神奈川',region:'関東',emoji:'🪷',themes:['歴史','自然','グルメ'],budget:'〜3万',budgetStr:'2〜4万円',season:'🌿 あじさい（6月）・紅葉（11月）',tags:['大仏','あじさい','中華街'],color:'#2a3e1a',
+    spots:[{name:'鎌倉大仏',desc:'高さ13.35mの国宝',emoji:'🪷'},{name:'長谷寺',desc:'あじさい・紅葉の名所',emoji:'🌺'},{name:'横浜中華街',desc:'日本最大の中華街',emoji:'🥟'},{name:'山下公園',desc:'港を見渡す公園',emoji:'⚓'}]},
+  {id:'fukuoka',name:'福岡',pref:'福岡',region:'九州・沖縄',emoji:'🍜',themes:['グルメ','都市'],budget:'〜3万',budgetStr:'2〜4万円',season:'🌸 桜（3〜4月）・博多祇園山笠（7月）',tags:['博多ラーメン','もつ鍋','屋台'],color:'#2a1a3e',
+    spots:[{name:'中洲屋台街',desc:'那珂川沿いの屋台。ラーメン',emoji:'🍜'},{name:'太宰府天満宮',desc:'全国天満宮の総本社',emoji:'⛩️'},{name:'博多キャナルシティ',desc:'運河が流れる複合施設',emoji:'🏙️'},{name:'海の中道海浜公園',desc:'玄界灘を望む大公園',emoji:'🌼'}]},
+  {id:'ishikawa',name:'金沢',pref:'石川',region:'中部',emoji:'🌿',themes:['歴史','グルメ','自然'],budget:'〜3万',budgetStr:'2〜4万円',season:'🦀 カニのシーズン（11〜3月）',tags:['兼六園','茶屋街','海鮮'],color:'#1a3a2a',
+    spots:[{name:'兼六園',desc:'日本三名園のひとつ',emoji:'🌿'},{name:'ひがし茶屋街',desc:'江戸時代の茶屋の街並み',emoji:'🏮'},{name:'近江町市場',desc:'金沢の台所',emoji:'🦀'},{name:'21世紀美術館',desc:'丸い建物と現代アート',emoji:'🎨'}]},
+];
+
+const MISSIONS = [
+  {id:'m1',title:'朝の神社で一礼',desc:'旅先の神社を朝9時前に参拝して写真を撮れ。',emoji:'⛩️',badge:'🌅',badgeName:'暁の巡礼者',difficulty:'easy',target:1},
+  {id:'m2',title:'地元の朝ごはん',desc:'地元民御用達の店で名物朝食を食べて写真を撮れ。',emoji:'🍳',badge:'🍱',badgeName:'食の探求者',difficulty:'easy',target:1},
+  {id:'m3',title:'絶景サンセット',desc:'海・山・湖のどれかで夕日の写真を撮れ。',emoji:'🌅',badge:'🌇',badgeName:'黄昏の旅人',difficulty:'medium',target:1},
+  {id:'m4',title:'地元の人と会話',desc:'地元の飲食店で店主と会話して写真を撮れ。',emoji:'🗣️',badge:'🤝',badgeName:'縁結び旅人',difficulty:'medium',target:1},
+  {id:'m5',title:'秘境スポット発見',desc:'観光ガイドに載っていない隠れた場所を見つけて写真を撮れ。',emoji:'🗺️',badge:'🔍',badgeName:'秘境ハンター',difficulty:'hard',target:1},
+  {id:'m6',title:'3県制覇の旅人',desc:'3つの異なる都道府県の旅先を引き当て、すべてに訪問せよ。',emoji:'🗾',badge:'👑',badgeName:'旅の王者',difficulty:'hard',target:3},
+];
+
+const HOTELS = [
+  {id:'h1',name:'KAMIKAZE RESORT 北海道',pref:'北海道',region:'北海道',emoji:'❄️',price:18000,priceStr:'¥18,000〜',features:['温泉','スキー場隣接','朝食付き','ペット可'],desc:'北海道の大自然に囲まれたリゾートホテル。ニセコの絶景を堪能できるインフィニティ温泉が人気。',stars:4.2,starCount:128,saved:false,
+    comments:[{user:'みつき',avatar:'🌸',text:'温泉からの雪景色が最高でした！また絶対来ます'},{user:'たろう',avatar:'🎒',text:'スタッフが親切で、部屋も清潔感あり'}]},
+  {id:'h2',name:'京の宿 花扇',pref:'京都',region:'近畿',emoji:'🏮',price:32000,priceStr:'¥32,000〜',features:['歴史的建築','茶道体験','朝食付き','鉄道近接'],desc:'築100年の京町家をリノベーションした宿。庭園を眺めながら本格的な茶道体験が楽しめる。',stars:4.8,starCount:89,saved:false,
+    comments:[{user:'さくら',avatar:'🌺',text:'茶道体験が最高でした。着物体験もセットで申し込めるのが良かった'},{user:'りんご',avatar:'🍎',text:'町家の雰囲気に浸れる素敵な宿'}]},
+  {id:'h3',name:'THE OCEAN OKINAWA',pref:'沖縄',region:'沖縄',emoji:'🌊',price:26000,priceStr:'¥26,000〜',features:['ビーチ直結','プール','朝食付き','シュノーケル'],desc:'沖縄本島屈指の透明度を誇るビーチに直結。水面に反射する夕日が息をのむ美しさ。',stars:4.5,starCount:214,saved:false,
+    comments:[{user:'うみ',avatar:'🐠',text:'ビーチまで歩いて30秒！毎朝海を見ながら朝食食べました'},{user:'そら',avatar:'☀️',text:'シュノーケルで珊瑚を見れて感動'}]},
+  {id:'h4',name:'城下町ホテル 金沢',pref:'石川',region:'関東',emoji:'🌿',price:14000,priceStr:'¥14,000〜',features:['観光地近接','朝食付き','駐車場無料'],desc:'兼六園まで徒歩5分の好立地。地元食材を使ったこだわりの朝食が旅人に大人気。',stars:4.1,starCount:67,saved:false,
+    comments:[{user:'かなざわ',avatar:'🌿',text:'兼六園が近くて助かりました。朝食の加賀料理が絶品'}]},
+  {id:'h5',name:'九州・由布院 温泉の宿',pref:'大分',region:'九州',emoji:'♨️',price:22000,priceStr:'¥22,000〜',features:['源泉かけ流し','2食付き','貸切風呂','竹林の庭'],desc:'由布岳を一望できる露天風呂が自慢。秋の紅葉シーズンは絶景の連続。',stars:4.6,starCount:156,saved:false,
+    comments:[{user:'ゆふいん',avatar:'♨️',text:'貸切風呂で由布岳を見ながら最高の時間'},{user:'のどか',avatar:'🍃',text:'食事も全部地元食材で、量も多くて大満足'}]},
+];
+
+const SAMPLE_REELS = [
+  {user:'みつき旅日記',avatar:'🌸',place:'京都・伏見稲荷',tag:'歴史',caption:'朝5時の千本鳥居、誰もいない…最高すぎた',hasMission:true,badge:'🌅',badgeName:'暁の巡礼者',emoji:'⛩️',likes:2341,comments:87},
+  {user:'旅食いしん坊',avatar:'🍜',place:'福岡・中洲屋台',tag:'グルメ',caption:'屋台のラーメン、東京で食べるの全部嘘だと思った笑',hasMission:true,badge:'🍱',badgeName:'食の探求者',emoji:'🍜',likes:1204,comments:43},
+  {user:'山好きたろう',avatar:'🏔️',place:'北海道・上高地',tag:'自然',caption:'梓川の透明度やばすぎ。リアルジブリだった',hasMission:false,emoji:'🏔️',likes:876,comments:31},
+  {user:'さくら旅日記',avatar:'🌺',place:'金沢・ひがし茶屋街',tag:'歴史',caption:'着物レンタルして茶屋街散策。地元のご主人に話しかけていただきました',hasMission:true,badge:'🤝',badgeName:'縁結び旅人',emoji:'🏮',likes:1567,comments:62},
+  {user:'沖縄リピーター',avatar:'🏝️',place:'沖縄・古宇利島',tag:'自然',caption:'この透明度を初めて見た時、泣きそうになった',hasMission:false,emoji:'🌺',likes:3210,comments:114},
+];
+
+let samplePosts = [
+  {user:'たびすと@みつき',avatar:'🌸',place:'京都・伏見稲荷',date:'2日前',caption:'朝5時の千本鳥居。人が全くいない幻想的な時間でした！#ドコイコ',hasMission:true,missionBadge:'🌅',missionName:'暁の巡礼者',emoji:'⛩️',likes:84,showComments:false,comments:[{user:'たろう',avatar:'🎒',text:'これは早起きの甲斐がありますね！'},{user:'はな',avatar:'🌸',text:'私も行きたい！ガチャ引いてみます'}]},
+  {user:'旅好き太郎',avatar:'🎒',place:'沖縄・古宇利島',date:'5日前',caption:'この透明度がやばすぎる！ガチャで沖縄引いたときは正直テンション下がったけど来てよかった笑 #ドコイコ',hasMission:false,emoji:'🏝️',likes:62,showComments:false,comments:[{user:'うみ',avatar:'🐠',text:'分かる！最初は都市がよかったけど離島は最高だよね'}]},
+];
+
+const PREFS_BY_REGION = {
+  '北海道・東北':['北海道','青森','岩手','宮城','秋田','山形','福島'],
+  '関東':['茨城','栃木','群馬','埼玉','千葉','東京','神奈川'],
+  '中部':['新潟','富山','石川','福井','山梨','長野','岐阜','静岡','愛知'],
+  '近畿':['三重','滋賀','京都','大阪','兵庫','奈良','和歌山'],
+  '中国・四国':['鳥取','島根','岡山','広島','山口','徳島','香川','愛媛','高知'],
+  '九州・沖縄':['福岡','佐賀','長崎','熊本','大分','宮崎','鹿児島','沖縄'],
+};
+
+// ========== STATE ==========
+let currentUser = null;
+const FAKE_USERS = {};
+let state = {charges:1,maxCharges:1,bonusClaimed:false,filters:{region:'all',theme:'all',budget:'all',pref:'all'},history:[],currentDest:null,spinning:false,missionProgress:{},earnedBadges:[],totalGacha:0,visitedDests:[],hotelFilter:'all',};
+let reelFilter = 'all';
+
+// ========== AUTH ==========
+function switchAuth(tab) {
+  document.getElementById('atLogin').classList.toggle('active',tab==='login');
+  document.getElementById('atSignup').classList.toggle('active',tab==='signup');
+  document.getElementById('afLogin').style.display = tab==='login'?'block':'none';
+  document.getElementById('afSignup').style.display = tab==='signup'?'block':'none';
+}
+function doLogin() {
+  const e=document.getElementById('lEmail').value.trim(), p=document.getElementById('lPass').value;
+  const err=document.getElementById('lErr');
+  if(!e||!p){err.textContent='メールアドレスとパスワードを入力してください';return;}
+  if(!FAKE_USERS[e]){err.textContent='アカウントが見つかりません';return;}
+  if(FAKE_USERS[e].pass!==p){err.textContent='パスワードが間違っています';return;}
+  err.textContent='';
+  loginUser({email:e,name:FAKE_USERS[e].name,avatar:FAKE_USERS[e].avatar,inviteCode:FAKE_USERS[e].inviteCode});
+}
+function doSignup() {
+  const n=document.getElementById('sName').value.trim(), e=document.getElementById('sEmail').value.trim(), p=document.getElementById('sPass').value, inv=document.getElementById('sInvite').value.trim();
+  const err=document.getElementById('sErr');
+  if(!n||!e||!p){err.textContent='全ての項目を入力してください';return;}
+  if(p.length<6){err.textContent='パスワードは6文字以上で設定してください';return;}
+  if(FAKE_USERS[e]){err.textContent='このメールアドレスは既に登録されています';return;}
+  const avs=['✈️','🗾','⛩️','🎌','🌸','🍜','🗺️','🏔️'];
+  const av=avs[Math.floor(Math.random()*avs.length)];
+  const code='TABI-'+Math.random().toString(36).substr(2,4).toUpperCase();
+  let bonus=1;
+  if(inv){
+    // Check invite code
+    const inviter=Object.values(FAKE_USERS).find(u=>u.inviteCode===inv);
+    if(inviter){bonus=2;showToast('招待コード適用！ガチャ+1回プレゼント🎁');}
+  }
+  FAKE_USERS[e]={pass:p,name:n,avatar:av,inviteCode:code};
+  err.textContent='';
+  loginUser({email:e,name:n,avatar:av,inviteCode:code,bonusCharges:bonus});
+}
+function socialLogin(provider) {
+  const names={Google:'Googleユーザー',LINE:'LINEユーザー',Apple:'Appleユーザー'};
+  const avs={Google:'🔍',LINE:'💬',Apple:'🍎'};
+  const e=`${provider.toLowerCase()}@demo.jp`;
+  const code='TABI-'+Math.random().toString(36).substr(2,4).toUpperCase();
+  if(!FAKE_USERS[e]) FAKE_USERS[e]={pass:'',name:names[provider],avatar:avs[provider],inviteCode:code};
+  loginUser({email:e,name:names[provider],avatar:avs[provider],inviteCode:code});
+}
+function loginUser(user) {
+  currentUser = user;
+  state.charges = user.bonusCharges || 1;
+  state.maxCharges = user.bonusCharges || 1;
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  document.getElementById('topName').textContent=user.name;
+  document.getElementById('topAvatar').textContent=user.avatar;
+  document.getElementById('pName').textContent=user.name;
+  document.getElementById('pEmail').textContent=user.email;
+  document.getElementById('pAvatar').textContent=user.avatar;
+  const code = user.inviteCode||'TABI-????';
+  document.getElementById('inviteCode').textContent=code;
+  document.getElementById('inviteCode2').textContent=code;
+  initApp();
+}
+function doLogout() {
+  currentUser=null;
+  document.getElementById('appScreen').style.display='none';
+  document.getElementById('authScreen').style.display='flex';
+  document.getElementById('lEmail').value='';document.getElementById('lPass').value='';document.getElementById('lErr').textContent='';
+  switchAuth('login');
+}
+
+// ========== APP ==========
+function initApp() {
+  renderChargeDots();
+  renderMissions();
+  renderPosts();
+  renderReels('all');
+  renderHotels('all');
+  renderProfile();
+}
+
+function renderChargeDots() {
+  const dots=document.getElementById('chargeDots');
+  dots.innerHTML='';
+  for(let i=0;i<Math.max(state.maxCharges,3);i++){
+    const d=document.createElement('div');
+    d.className='cdot'+(i>=state.charges?' used':'');
+    dots.appendChild(d);
+  }
+  document.getElementById('chargeNum').innerHTML=`${state.charges} <small>/ ${state.maxCharges}回</small>`;
+}
+
+function addCharge(source) {
+  state.charges++;
+  state.maxCharges++;
+  renderChargeDots();
+  document.getElementById('mainBtn').disabled=false;
+  const msgs={invite:'👫 招待特典！ガチャ+1回',login:'🎁 ログインボーナス！ガチャ+1回',premium:'👑 プレミアム特典！ガチャ+3回'};
+  showToast(msgs[source]||'ガチャ回数が増えました！');
+  confettiBurst();
+}
+
+function claimLoginBonus() {
+  if(state.bonusClaimed){showToast('本日のボーナスは受け取り済みです');return;}
+  state.bonusClaimed=true;
+  addCharge('login');
+}
+
+function showInviteModal(){
+  document.getElementById('inviteOverlay').classList.add('open');
+}
+
+function copyInviteCode() {
+  const code = currentUser?.inviteCode||'TABI-????';
+  const text = `ドコイコに招待します！このコードで登録するとガチャ+1回もらえます🎁\n招待コード: ${code}\nhttps://doko-iko.jp`;
+  if(navigator.clipboard) navigator.clipboard.writeText(text).then(()=>showToast('招待コードをコピーしました！'));
+  else showToast('コード: '+code);
+}
+
+function shareInvite(platform) {
+  const code = currentUser?.inviteCode||'TABI-????';
+  const text = `ドコイコに招待します！このコードで登録するとガチャ+1回もらえます🎁 招待コード: ${code} #ドコイコ #旅ガチャ`;
+  doShare(platform, text, 'https://doko-iko.jp');
+}
+
+// ========== FILTERS ==========
+function sf(btn,type,val) {
+  btn.closest('.fr').querySelectorAll('.fc').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  state.filters[type]=val;
+  if(type==='region'){
+    const row=document.getElementById('prefRow');
+    if(val!=='all'){
+      row.style.display='flex';
+      const prefs=PREFS_BY_REGION[val]||[];
+      document.getElementById('prefChips').innerHTML=prefs.map(p=>`<button class="fc" style="margin:2px" onclick="setPref(this,'${p}')">${p}</button>`).join('');
+      state.filters.pref='all';
+    } else { row.style.display='none'; state.filters.pref='all'; }
+  }
+}
+function setPref(btn,pref){
+  document.getElementById('prefChips').querySelectorAll('.fc').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  state.filters.pref=pref;
+}
+function getFDests(){
+  return DESTS.filter(d=>{
+    if(state.filters.region!=='all'&&d.region!==state.filters.region)return false;
+    if(state.filters.pref&&state.filters.pref!=='all'&&d.pref!==state.filters.pref)return false;
+    if(state.filters.theme!=='all'&&!d.themes.includes(state.filters.theme))return false;
+    if(state.filters.budget!=='all'&&d.budget!==state.filters.budget)return false;
+    return true;
+  });
+}
+
+// ========== GACHA ==========
+function doGacha(){
+  if(state.spinning)return;
+  if(state.charges<=0){showToast('本日のガチャ回数が終了しました。友達招待でガチャ回数を増やせます！');return;}
+  const pool=getFDests().filter(d=>d!==state.currentDest);
+  if(pool.length===0){showToast('フィルターに該当する旅先がありません');return;}
+  state.spinning=true; state.charges--; state.totalGacha++;
+  renderChargeDots();
+  if(state.charges<=0) document.getElementById('mainBtn').disabled=true;
+  const ball=document.getElementById('ball'),card=document.getElementById('resultCard');
+  card.classList.remove('show');
+  document.getElementById('bcontent').innerHTML=`<div class="bemoji">🌀</div><div class="bhint">引き中...</div>`;
+  ball.classList.add('spinning');
+  setTimeout(()=>{
+    ball.classList.remove('spinning');
+    const dest=pool[Math.floor(Math.random()*pool.length)];
+    state.currentDest=dest;
+    if(!state.visitedDests.find(v=>v.id===dest.id))state.visitedDests.push(dest);
+    document.getElementById('bcontent').innerHTML=`<div class="bemoji">${dest.emoji}</div><div class="bplace">${dest.name}</div><div class="bpref">${dest.pref}</div>`;
+    renderResult(dest);
+    addHistory(dest);
+    drawShareCard(dest);
+    confettiBurst();
+    renderProfile();
+    state.spinning=false;
+    if(state.charges>0) document.getElementById('mainBtn').disabled=false;
+  },950);
+}
+
+function renderResult(dest){
+  document.getElementById('resName').textContent=dest.name;
+  document.getElementById('resSub').textContent=`${dest.pref} · ${dest.region}`;
+  document.getElementById('resBudget').textContent=dest.budgetStr;
+  document.getElementById('resSeason').textContent=dest.season;
+  document.getElementById('resTags').innerHTML=dest.tags.map(t=>`<span class="rtag">${t}</span>`).join('');
+  document.getElementById('spotList').innerHTML=dest.spots.map(s=>`
+    <a class="si" href="https://www.google.com/maps/search/${encodeURIComponent(s.name+' '+dest.pref)}" target="_blank">
+      <div class="si-emoji">${s.emoji}</div>
+      <div class="si-info"><div class="si-name">${s.name}</div><div class="si-desc">${s.desc}</div></div>
+      <div class="si-map">🗺 MAP</div>
+    </a>`).join('');
+  document.getElementById('resultCard').classList.add('show');
+}
+
+function openMap(){
+  if(!state.currentDest)return;
+  window.open(`https://www.google.com/maps/search/${encodeURIComponent(state.currentDest.name+' '+state.currentDest.pref+' 観光スポット')}`,'_blank');
+}
+
+function addHistory(dest){
+  state.history.unshift(dest);
+  if(state.history.length>6)state.history.pop();
+  document.getElementById('historyWrap').style.display='block';
+  document.getElementById('historyBar').innerHTML=state.history.map(d=>`<div style="font-size:10px;padding:3px 8px;background:rgba(28,20,16,0.05);border-radius:9px;color:var(--txt-mid);display:flex;align-items:center;gap:3px;">${d.emoji} ${d.name}</div>`).join('');
+}
+
+// ========== SHARE CARD (Canvas) ==========
+function drawShareCard(dest){
+  const canvas=document.getElementById('shareCanvas');
+  const dpr=window.devicePixelRatio||1;
+  const W=600,H=750;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  // Background gradient
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,dest.color||'#1a1008');
+  bg.addColorStop(0.5,'#2d1e0e');
+  bg.addColorStop(1,'#1a0a0a');
+  ctx.fillStyle=bg;
+  ctx.fillRect(0,0,W,H);
+
+  // Noise texture dots
+  ctx.save();
+  for(let i=0;i<400;i++){
+    ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.06})`;
+    ctx.beginPath();
+    ctx.arc(Math.random()*W,Math.random()*H,Math.random()*1.5,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // Decorative circle
+  const grd=ctx.createRadialGradient(W/2,H/2,50,W/2,H/2,350);
+  grd.addColorStop(0,`rgba(212,168,67,0.12)`);
+  grd.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=grd;
+  ctx.fillRect(0,0,W,H);
+
+  // Outer ring
+  ctx.save();
+  ctx.strokeStyle='rgba(212,168,67,0.25)';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.arc(W/2,H*0.38,200,0,Math.PI*2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(W/2,H*0.38,220,0,Math.PI*2);
+  ctx.stroke();
+  ctx.restore();
+
+  // Big emoji
+  ctx.font=`${120}px serif`;
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.shadowColor='rgba(0,0,0,0.5)';
+  ctx.shadowBlur=20;
+  ctx.fillText(dest.emoji,W/2,H*0.32);
+  ctx.shadowBlur=0;
+
+  // App name
+  ctx.font='bold 16px Oswald, sans-serif';
+  ctx.fillStyle='rgba(240,201,106,0.6)';
+  ctx.letterSpacing='6px';
+  ctx.fillText('ド コ イ コ',W/2,60);
+
+  // Eyebrow
+  ctx.font='13px serif';
+  ctx.fillStyle='rgba(240,201,106,0.7)';
+  ctx.fillText('✦ 運命の旅先が決まりました ✦',W/2,H*0.56);
+
+  // Destination name
+  ctx.font=`bold ${dest.name.length>4?56:68}px "Shippori Mincho","Zen Antique Soft",serif`;
+  ctx.fillStyle='#ffffff';
+  ctx.shadowColor='rgba(0,0,0,0.6)';
+  ctx.shadowBlur=12;
+  ctx.fillText(dest.name,W/2,H*0.65);
+  ctx.shadowBlur=0;
+
+  // Prefecture
+  ctx.font='22px "Noto Sans JP",sans-serif';
+  ctx.fillStyle='rgba(255,255,255,0.55)';
+  ctx.fillText(dest.pref + ' · ' + dest.region,W/2,H*0.72);
+
+  // Tags
+  const tags=dest.tags;
+  const tagW=100; const totalTagW=tags.length*tagW+(tags.length-1)*10;
+  const tagStartX=(W-totalTagW)/2;
+  tags.forEach((tag,i)=>{
+    const tx=tagStartX+i*(tagW+10);
+    ctx.save();
+    ctx.fillStyle='rgba(255,255,255,0.1)';
+    ctx.strokeStyle='rgba(255,255,255,0.2)';
+    ctx.lineWidth=1;
+    roundRect(ctx,tx,H*0.77,tagW,26,13);
+    ctx.fill(); ctx.stroke();
+    ctx.font='13px "Noto Sans JP",sans-serif';
+    ctx.fillStyle='rgba(255,255,255,0.75)';
+    ctx.fillText(tag,tx+tagW/2,H*0.77+14);
+    ctx.restore();
+  });
+
+  // Divider
+  ctx.strokeStyle='rgba(212,168,67,0.3)';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(80,H*0.85);ctx.lineTo(W-80,H*0.85);
+  ctx.stroke();
+
+  // Bottom
+  ctx.font='15px "Noto Sans JP",sans-serif';
+  ctx.fillStyle='rgba(240,201,106,0.5)';
+  ctx.fillText('doko-iko.jp  |  #ドコイコ  |  #旅ガチャ',W/2,H*0.92);
+
+  // Seal / stamp
+  ctx.save();
+  ctx.translate(W-70,H-70);
+  ctx.rotate(0.3);
+  ctx.strokeStyle='rgba(192,57,43,0.7)';
+  ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(0,0,38,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,30,0,Math.PI*2);ctx.stroke();
+  ctx.font='bold 22px serif';
+  ctx.fillStyle='rgba(192,57,43,0.8)';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('旅',0,0);
+  ctx.restore();
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+function shareResult(platform){
+  const dest=state.currentDest;
+  if(!dest){showToast('先にガチャを引いてください');return;}
+  const text=`ドコイコで「${dest.name}（${dest.pref}）」を引きました！🎲✈️\n#ドコイコ #旅ガチャ #${dest.name.replace('・','')}`;
+  const url='https://doko-iko.jp';
+  if(platform==='download'){
+    const a=document.createElement('a');
+    a.download=`dokoko-${dest.name}.png`;
+    a.href=document.getElementById('shareCanvas').toDataURL('image/png');
+    a.click();
+    showToast('画像を保存しました！');
+  } else { doShare(platform,text,url); }
+}
+
+// ========== REELS ==========
+function filterReels(el,tag){
+  document.querySelectorAll('.rfc').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active'); reelFilter=tag; renderReels(tag);
+}
+function renderReels(tag){
+  const feed=document.getElementById('reelFeed');
+  const filtered=tag==='all'?SAMPLE_REELS:tag==='mission'?SAMPLE_REELS.filter(r=>r.hasMission):SAMPLE_REELS.filter(r=>r.tag===tag);
+  feed.innerHTML=filtered.map(r=>`
+    <div class="reel-card">
+      <div class="reel-bg-emoji">${r.emoji}</div>
+      <div class="reel-grad"></div>
+      ${r.hasMission?`<div class="reel-badge"><span>${r.badge}</span>${r.badgeName}</div>`:''}
+      <div class="reel-play-btn" onclick="openVideo('${r.emoji}','${r.user}')">▶️</div>
+      <div class="reel-info">
+        <div class="reel-user">
+          <div class="reel-avatar">${r.avatar}</div>
+          <span class="reel-uname">${r.user}</span>
+          <span class="reel-follow">フォロー</span>
+        </div>
+        <div class="reel-place">📍 ${r.place}</div>
+        <div class="reel-caption">${r.caption}</div>
+      </div>
+      <div class="reel-actions">
+        <div class="raction" onclick="likeReel(this)"><span class="raction-icon">❤️</span><span class="raction-count">${r.likes.toLocaleString()}</span></div>
+        <div class="raction"><span class="raction-icon">💬</span><span class="raction-count">${r.comments}</span></div>
+        <div class="raction" onclick="openVideo('${r.emoji}','${r.user}')"><span class="raction-icon">🔖</span><span class="raction-count">保存</span></div>
+      </div>
+      <div class="reel-share-strip">
+        <span class="rss-label">シェア</span>
+        <button class="rsb sb-ig" onclick="doShare('instagram','${r.caption} #ドコイコ','https://doko-iko.jp')">📸 IG</button>
+        <button class="rsb sb-tw" onclick="doShare('twitter','${r.caption} #ドコイコ','https://doko-iko.jp')">𝕏</button>
+        <button class="rsb sb-line" onclick="doShare('line','${r.caption} #ドコイコ','https://doko-iko.jp')">LINE</button>
+        <button class="rsb sb-copy" onclick="doShare('copy','${r.caption} #ドコイコ','https://doko-iko.jp')">🔗</button>
+      </div>
+    </div>`).join('');
+}
+function likeReel(el){const c=el.querySelector('.raction-count');c.textContent=(parseInt(c.textContent.replace(',',''))+1).toLocaleString();el.querySelector('.raction-icon').textContent='💖';}
+function openVideo(emoji){document.getElementById('videoEmoji').textContent=emoji;document.getElementById('videoOverlay').classList.add('open');}
+function closeVideo(){document.getElementById('videoOverlay').classList.remove('open');}
+
+// ========== MISSIONS ==========
+function renderMissions(){
+  document.getElementById('missionList').innerHTML=MISSIONS.map(m=>{
+    const prog=state.missionProgress[m.id]||0,done=prog>=m.target;
+    return `<div class="mcard ${done?'done':''} ${m.difficulty==='hard'?'hard':''}">
+      <div class="mtop"><div class="micon">${m.emoji}</div>
+        <div class="minfo"><div class="mtitle">${m.title}</div><div class="mdesc">${m.desc}</div></div>
+        <div class="mbadge"><span class="mbadge-icon">${m.badge}</span><div class="mbadge-name">${m.badgeName}</div></div>
+      </div>
+      ${m.target>1?`<div class="mprog-wrap"><div class="mprog"><div class="mprog-fill" style="width:${(prog/m.target)*100}%"></div></div><div class="mprog-label">${prog}/${m.target}</div></div>`:''}
+      <button class="mupload-btn ${done?'done-state':''}" onclick="openUploadMission('${m.id}')">
+        ${done?`✅ 達成済み「${m.badgeName}」バッジ獲得`:'📷 達成写真を投稿してバッジをゲット'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+// ========== COMMUNITY ==========
+function renderPosts(){
+  document.getElementById('postGrid').innerHTML=samplePosts.map((p,i)=>`
+    <div class="pcard">
+      <div class="pimg">${p.emoji}${p.hasMission?`<div class="pmission-badge"><span>${p.missionBadge}</span>${p.missionName}</div>`:''}</div>
+      <div class="pbody">
+        <div class="puser"><div class="pavatar">${p.avatar}</div><div class="pname">${p.user}</div><div class="pdate">${p.date}</div></div>
+        <div class="pplace">📍 ${p.place}</div>
+        <div class="pcaption">${p.caption}</div>
+        <div class="pactions">
+          <button class="paction" onclick="likePost(this)">❤️ <span>${p.likes}</span></button>
+          <button class="paction" onclick="toggleComments(${i})">💬 ${p.comments.length}</button>
+          <button class="paction">🔖 保存</button>
+        </div>
+        <div class="post-share-row">
+          <span class="psr-label">シェア</span>
+          <button class="psb sb-ig" onclick="doShare('instagram','${p.caption}','https://doko-iko.jp')">📸 IG</button>
+          <button class="psb sb-tw" onclick="doShare('twitter','${p.caption}','https://doko-iko.jp')">𝕏</button>
+          <button class="psb sb-line" onclick="doShare('line','${p.caption}','https://doko-iko.jp')">LINE</button>
+          <button class="psb sb-copy" onclick="doShare('copy','${p.caption}','https://doko-iko.jp')">🔗</button>
+        </div>
+      </div>
+      ${p.showComments?`
+      <div class="comments-section">
+        <div class="comments-title">コメント</div>
+        ${p.comments.map(c=>`<div class="comment-item"><div class="c-avatar">${c.avatar}</div><div class="c-content"><div class="c-name">${c.user}</div><div class="c-text">${c.text}</div></div></div>`).join('')}
+        <div class="comment-input-row">
+          <input class="comment-input" placeholder="コメントを入力..." id="ci${i}">
+          <button class="comment-submit" onclick="addComment(${i})">送信</button>
+        </div>
+      </div>`:''}
+    </div>`).join('');
+}
+function likePost(btn){const s=btn.querySelector('span');s.textContent=parseInt(s.textContent)+1;btn.style.color='var(--vermillion)';}
+function toggleComments(i){samplePosts[i].showComments=!samplePosts[i].showComments;renderPosts();}
+function addComment(i){
+  const inp=document.getElementById('ci'+i);
+  if(!inp||!inp.value.trim())return;
+  samplePosts[i].comments.push({user:currentUser?.name||'あなた',avatar:currentUser?.avatar||'✈️',text:inp.value.trim()});
+  renderPosts();
+}
+
+// ========== HOTELS ==========
+function hFilter(el,region){
+  document.querySelectorAll('.hfc').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active'); state.hotelFilter=region; renderHotels(region);
+}
+function renderHotels(region){
+  const hotels=region==='all'?HOTELS:HOTELS.filter(h=>h.region===region);
+  document.getElementById('hotelGrid').innerHTML=hotels.map(h=>`
+    <div class="hcard">
+      <div class="himg">${h.emoji}
+        <div class="h-pref-tag">${h.pref}</div>
+        <button class="h-saved-btn ${h.saved?'saved':''}" onclick="toggleSave('${h.id}',this)">${h.saved?'❤️':'🤍'}</button>
+      </div>
+      <div class="hbody">
+        <div class="hname">${h.name}</div>
+        <div class="hloc" onclick="window.open('https://www.google.com/maps/search/${encodeURIComponent(h.name+' '+h.pref)}','_blank')">📍 ${h.pref} &nbsp;→ Googleマップで確認</div>
+        <div class="hstar-row">
+          <div class="hstars">${renderStars(h.id,h.stars)}</div>
+          <span class="hstar-count">${h.stars.toFixed(1)} (${h.starCount}件)</span>
+        </div>
+        <div class="hprice-row">
+          <span class="hprice-label">料金（1泊1名〜）</span>
+          <span class="hprice">${h.priceStr}<small> /泊</small></span>
+        </div>
+        <div class="hfeatures">${h.features.map(f=>`<span class="hfeat">✓ ${f}</span>`).join('')}</div>
+        <div style="font-size:11px;color:var(--txt-mid);line-height:1.6;margin-bottom:12px;">${h.desc}</div>
+        <div class="hactions">
+          <button class="h-map-btn" onclick="window.open('https://www.google.com/maps/search/${encodeURIComponent(h.name+' '+h.pref)}','_blank')">🗺 Googleマップ</button>
+          <button class="h-reserve-btn" onclick="showToast('予約サイト連携は近日公開予定！')">🏨 予約する</button>
+        </div>
+      </div>
+      <div class="hcomments">
+        <div class="hcomments-title">口コミ・コメント</div>
+        ${h.comments.map(c=>`<div class="comment-item"><div class="c-avatar">${c.avatar}</div><div class="c-content"><div class="c-name">${c.user}</div><div class="c-text">${c.text}</div></div></div>`).join('')}
+        <div class="comment-input-row">
+          <input class="comment-input" placeholder="コメントを投稿..." id="hci${h.id}">
+          <button class="comment-submit" onclick="addHotelComment('${h.id}')">送信</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function renderStars(hotelId,rating){
+  return [1,2,3,4,5].map(i=>`<span class="hstar" onclick="rateHotel('${hotelId}',${i})">${i<=Math.round(rating)?'⭐':'☆'}</span>`).join('');
+}
+function rateHotel(hotelId,rating){
+  const h=HOTELS.find(h=>h.id===hotelId);
+  if(h){h.stars=((h.stars*h.starCount)+rating)/(h.starCount+1);h.starCount++;renderHotels(state.hotelFilter);showToast(`⭐ ${rating}つ星で評価しました！`);}
+}
+function toggleSave(hotelId,btn){
+  const h=HOTELS.find(h=>h.id===hotelId);
+  if(h){h.saved=!h.saved;btn.textContent=h.saved?'❤️':'🤍';btn.classList.toggle('saved',h.saved);showToast(h.saved?'❤️ 保存しました':'保存を解除しました');}
+}
+function addHotelComment(hotelId){
+  const inp=document.getElementById('hci'+hotelId);
+  if(!inp||!inp.value.trim())return;
+  const h=HOTELS.find(h=>h.id===hotelId);
+  if(h){h.comments.push({user:currentUser?.name||'あなた',avatar:currentUser?.avatar||'✈️',text:inp.value.trim()});renderHotels(state.hotelFilter);}
+}
+
+// ========== PROFILE ==========
+function renderProfile(){
+  document.getElementById('stGacha').textContent=state.totalGacha;
+  document.getElementById('stVisited').textContent=state.visitedDests.length;
+  document.getElementById('stBadges').textContent=state.earnedBadges.length;
+  document.getElementById('badgeGrid').innerHTML=MISSIONS.map(m=>{
+    const done=state.earnedBadges.includes(m.id);
+    return `<div class="badge-item ${done?'':'locked'}"><div class="badge-icon">${m.badge}</div><div class="badge-name">${m.badgeName}</div></div>`;
+  }).join('');
+  document.getElementById('visitedChips').innerHTML=state.visitedDests.length>0
+    ?state.visitedDests.map(d=>`<div class="vchip">${d.emoji} ${d.name}</div>`).join('')
+    :'<div style="font-size:11px;color:var(--txt-light)">まだ旅先がありません。ガチャを引いてみよう！</div>';
+}
+
+// ========== UPLOAD ==========
+let currentMissionId=null;
+function openUpload(){
+  if(!currentUser){showToast('ログインが必要です');return;}
+  currentMissionId=null;
+  document.getElementById('uploadSub').textContent='📸 ミッション達成の写真は特別バッジ付きで投稿できます';
+  document.getElementById('missionPickWrap').style.display='block';
+  document.getElementById('missionPickList').innerHTML=MISSIONS.map(m=>`
+    <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--paper);border-radius:7px;cursor:pointer;border:1.5px solid var(--paper-mid);">
+      <input type="checkbox" value="${m.id}" style="accent-color:var(--vermillion)">
+      <span>${m.badge}</span><span style="font-size:11px">${m.title}</span>
+    </label>`).join('');
+  document.getElementById('uploadOverlay').classList.add('open');
+}
+function openUploadMission(mId){
+  if(!currentUser){showToast('ログインが必要です');return;}
+  currentMissionId=mId;
+  const m=MISSIONS.find(x=>x.id===mId);
+  document.getElementById('uploadSub').textContent=`🏅「${m.title}」のミッション達成写真を投稿します`;
+  document.getElementById('missionPickWrap').style.display='none';
+  document.getElementById('uploadOverlay').classList.add('open');
+}
+function closeOverlay(e,id){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
+function simUpload(){document.querySelector('.upload-area').innerHTML='<div style="font-size:40px">✅</div><div style="font-size:11px;color:var(--sage);margin-top:6px">写真が選択されました</div>';}
+function submitPost(){
+  document.getElementById('uploadOverlay').classList.remove('open');
+  let mId=currentMissionId;
+  if(!mId){const c=document.querySelector('#missionPickList input:checked');if(c)mId=c.value;}
+  if(mId){
+    if(!state.missionProgress[mId])state.missionProgress[mId]=0;
+    state.missionProgress[mId]++;
+    const m=MISSIONS.find(x=>x.id===mId);
+    if(m&&state.missionProgress[mId]>=m.target&&!state.earnedBadges.includes(mId)){
+      state.earnedBadges.push(mId);confettiBurst();
+      setTimeout(()=>showToast(`🏅「${m.badgeName}」バッジを獲得！`),400);
+    }
+    renderMissions();
+  }
+  const dest=state.currentDest,m=mId?MISSIONS.find(x=>x.id===mId):null;
+  samplePosts.unshift({
+    user:currentUser.name,avatar:currentUser.avatar,
+    place:dest?`${dest.name}・${dest.pref}`:'旅先',date:'たった今',
+    caption:`ドコイコで引いた旅先に実際に行ってきました！ #ドコイコ #旅ガチャ`,
+    hasMission:!!m,missionBadge:m?m.badge:'',missionName:m?m.badgeName:'',
+    emoji:dest?dest.emoji:'📸',likes:0,showComments:false,comments:[],
+  });
+  renderPosts(); renderProfile();
+  document.querySelector('.upload-area').innerHTML='<div style="font-size:40px;margin-bottom:7px">📷</div><div style="font-size:11px;color:var(--txt-mid);letter-spacing:1px">写真を選択またはドラッグ＆ドロップ</div>';
+  confettiBurst(); switchTab('community');
+  if(!m) showToast('投稿しました！');
+}
+
+// ========== TABS ==========
+function switchTab(tab){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  const labels={gacha:'ガチャ',reels:'リール',mission:'ミッション',community:'投稿',hotels:'宿',profile:'マイページ'};
+  document.querySelectorAll('.ni').forEach(b=>{if(b.querySelector('.ni-label').textContent===labels[tab])b.classList.add('active');});
+}
+
+// ========== SHARE ==========
+function doShare(platform,text,url){
+  if(platform==='instagram'){showToast('📸 Instagramのストーリーズを開きます！');window.open('https://www.instagram.com/','_blank');}
+  else if(platform==='twitter'){window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,'_blank');}
+  else if(platform==='line'){window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,'_blank');}
+  else if(platform==='copy'){const t=`${text}\n${url}`;if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>showToast('🔗 コピーしました！'));else showToast('コピーしてください: '+url);}
+}
+
+// ========== UTILS ==========
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+function confettiBurst(){
+  const c=document.getElementById('confetti');c.innerHTML='';
+  const colors=['#c0392b','#d4a843','#f0c96a','#1e3a6e','#4a7a5a','#fff'];
+  for(let i=0;i<65;i++){
+    const el=document.createElement('div'),color=colors[Math.floor(Math.random()*colors.length)],size=Math.random()*10+5;
+    el.style.cssText=`position:absolute;left:${20+Math.random()*60}%;top:${20+Math.random()*50}%;width:${size}px;height:${size}px;background:${color};border-radius:${Math.random()>.5?'50%':'2px'};opacity:0;pointer-events:none;`;
+    el.animate([{opacity:1,transform:'translate(0,0) rotate(0deg) scale(1)'},{opacity:0,transform:`translate(${(Math.random()-.5)*200}px,${-(Math.random()*180+60)}px) rotate(${Math.random()*720}deg) scale(0.2)`}],{duration:1000+Math.random()*600,easing:'cubic-bezier(0,0.9,0.57,1)',fill:'forwards',delay:Math.random()*300});
+    c.appendChild(el);
+  }
+}
+</script>
+</body>
+</html>
