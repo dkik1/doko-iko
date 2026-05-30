@@ -350,17 +350,17 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--paper);color:var(--t
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://gmrizpfbxwhokhajnpwe.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdtcml6cGZieHdob2toYWpucHdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDY4MTgsImV4cCI6MjA5NTY4MjgxOH0.Fgxm5REafJpntK18FfhJzysSlFMBLvD9zJwsbmDlQps';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const _SUPA_URL = 'https://gmrizpfbxwhokhajnpwe.supabase.co';
+const _SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdtcml6cGZieHdob2toYWpucHdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDY4MTgsImV4cCI6MjA5NTY4MjgxOH0.Fgxm5REafJpntK18FfhJzysSlFMBLvD9zJwsbmDlQps';
+const _supa = window.supabase.createClient(_SUPA_URL, _SUPA_KEY);
 
 async function sbSignup(email, pass, name) {
-  const { data, error } = await supabase.auth.signUp({ email, password: pass });
+  const { data, error } = await _supa.auth.signUp({ email, password: pass });
   if (error) return { error: error.message };
   const code = 'TABI-' + Math.random().toString(36).substr(2,4).toUpperCase();
   const avs = ['✈️','🗾','⛩️','🎌','🌸','🍜','🗺️','🏔️'];
   const avatar = avs[Math.floor(Math.random()*avs.length)];
-  await supabase.from('users').insert({
+  await _supa.from('users').insert({
     id: data.user.id,
     email, name, avatar,
     invite_code: code,
@@ -370,14 +370,14 @@ async function sbSignup(email, pass, name) {
 }
 
 async function sbLogin(email, pass) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  const { data, error } = await _supa.auth.signInWithPassword({ email, password: pass });
   if (error) return { error: error.message };
-  const { data: profile } = await supabase.from('users').select('*').eq('id', data.user.id).single();
+  const { data: profile } = await _supa.from('users').select('*').eq('id', data.user.id).single();
   return { user: { id: data.user.id, email, name: profile?.name || 'ユーザー', avatar: profile?.avatar || '✈️', inviteCode: profile?.invite_code || 'TABI-????' } };
 }
 
 async function sbSaveGacha(userId, dest) {
-  await supabase.from('gacha_history').insert({
+  await _supa.from('gacha_history').insert({
     user_id: userId,
     destination_name: dest.name,
     prefecture: dest.pref,
@@ -386,7 +386,7 @@ async function sbSaveGacha(userId, dest) {
 }
 
 async function sbSavePost(userId, post) {
-  await supabase.from('posts').insert({
+  await _supa.from('posts').insert({
     user_id: userId,
     place: post.place,
     caption: post.caption,
@@ -396,20 +396,6 @@ async function sbSavePost(userId, post) {
     mission_name: post.missionName || '',
     likes: 0,
   });
-}
-
-async function sbGetPosts() {
-  const { data } = await supabase.from('posts').select('*, users(name, avatar)').order('created_at', { ascending: false }).limit(20);
-  return data || [];
-}
-
-async function sbSaveMission(userId, missionId, progress, completed) {
-  const { data: existing } = await supabase.from('missions').select('*').eq('user_id', userId).eq('mission_id', missionId).single();
-  if (existing) {
-    await supabase.from('missions').update({ progress, completed }).eq('user_id', userId).eq('mission_id', missionId);
-  } else {
-    await supabase.from('missions').insert({ user_id: userId, mission_id: missionId, progress, completed });
-  }
 }
 </script>
 </head>
